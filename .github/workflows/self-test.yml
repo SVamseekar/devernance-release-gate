@@ -1,0 +1,96 @@
+name: self-test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gate script against the mock server
+        run: bash test/run.sh
+      - name: Evgraph step against fixtures
+        run: bash test/run-evgraph.sh
+
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start mock Assurance OS
+        run: |
+          python3 test/mock-server.py 8787 &
+          for _ in $(seq 1 50); do curl -s -o /dev/null http://127.0.0.1:8787/ && break; sleep 0.1; done
+
+      - id: pass
+        uses: ./
+        with: { api-key: test-key, system-id: pass, api-url: "http://127.0.0.1:8787" }
+      - name: PASS succeeds with outputs
+        run: |
+          test "${{ steps.pass.outcome }}" = success
+          test "${{ steps.pass.outputs.decision }}" = PASS
+          test '${{ steps.pass.outputs.blockers }}' = '[]'
+
+      - id: blocked
+        uses: ./
+        continue-on-error: true
+        with: { api-key: test-key, system-id: blocked, api-url: "http://127.0.0.1:8787" }
+      - name: BLOCKED fails and reports blockers
+        run: |
+          test "${{ steps.blocked.outcome }}" = failure
+          test "${{ steps.blocked.outputs.decision }}" = BLOCKED
+          echo '${{ steps.blocked.outputs.blockers }}' | jq -e 'index("CONTROL:HUMAN_OVERSIGHT") != null'
+
+      - id: review-default
+        uses: ./
+        with: { api-key: test-key, system-id: review, api-url: "http://127.0.0.1:8787" }
+      - id: review-strict
+        uses: ./
+        continue-on-error: true
+        with: { api-key: test-key, system-id: review, api-url: "http://127.0.0.1:8787", fail-on: review }
+      - name: REVIEW passes by default and fails with fail-on review
+        run: |
+          test "${{ steps.review-default.outcome }}" = success
+          test "${{ steps.review-strict.outcome }}" = failure
+
+      - id: wrong-key
+        uses: ./
+        continue-on-error: true
+        with: { api-key: wrong, system-id: pass, api-url: "http://127.0.0.1:8787" }
+      - id: unknown-system
+        uses: ./
+        continue-on-error: true
+        with: { api-key: test-key, system-id: nope, api-url: "http://127.0.0.1:8787" }
+      - id: api-down
+        uses: ./
+        continue-on-error: true
+        with: { api-key: test-key, system-id: pass, api-url: "http://127.0.0.1:1" }
+      - name: Wrong key, unknown system, and API down all fail
+        run: |
+          test "${{ steps.wrong-key.outcome }}" = failure
+          test "${{ steps.unknown-system.outcome }}" = failure
+          test "${{ steps.api-down.outcome }}" = failure
+
+      - id: with-evgraph
+        uses: ./
+        with:
+          api-key: test-key
+          system-id: pass
+          api-url: "http://127.0.0.1:8787"
+          evgraph-scan: test/fixtures/model_card.json test/fixtures/approval.json test/fixtures/deployment.json
+      - id: evgraph-inconsistent
+        uses: ./
+        continue-on-error: true
+        with:
+          api-key: test-key
+          system-id: pass
+          api-url: "http://127.0.0.1:8787"
+          evgraph-scan: test/fixtures/model_card.json test/fixtures/approval.json test/fixtures/deployment-before-approval.json
+      - name: Evgraph scan passes on consistent records and fails when deployment precedes approval
+        run: |
+          test "${{ steps.with-evgraph.outcome }}" = success
+          test "${{ steps.evgraph-inconsistent.outcome }}" = failure
