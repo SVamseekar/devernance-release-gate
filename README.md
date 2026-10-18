@@ -11,11 +11,14 @@ repository with [`evgraph scan-promotion --gate`](https://pypi.org/project/evgra
 name: AI release gate
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: SVamseekar/assurance-os-release-gate@v1
         with:
           api-key: ${{ secrets.ASSURANCE_API_KEY }}
@@ -96,6 +99,31 @@ Evidence and readiness signal, not legal advice.
 4. Add `ASSURANCE_SYSTEM_ID` (from the system's page) and `ASSURANCE_URL` as repository variables.
 
 Each call counts as one gate run on your plan.
+
+## Versions
+
+`@v1` follows the newest `v1.x.y`, so you get fixes without editing your workflow. Breaking changes ship as `v2`.
+Each `vX.Y.Z` release is immutable: its tag cannot be moved or deleted.
+
+If your organisation requires actions pinned to a commit, pin the SHA of a release and keep the version as a
+comment. Dependabot then opens a pull request for each new release:
+
+```yaml
+      - uses: SVamseekar/assurance-os-release-gate@<commit-sha> # v1.0.0
+```
+
+```yaml
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+```
+
+Runs on GitHub-hosted Ubuntu and macOS runners, and on self-hosted runners with `bash`, `curl` and `jq`
+(`python3` as well for `evgraph-scan`).
 
 ## Development
 

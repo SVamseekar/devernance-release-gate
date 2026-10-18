@@ -11,16 +11,19 @@ jobs:
   scripts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Gate script against the mock server
         run: bash test/run.sh
       - name: Evgraph step against fixtures
         run: bash test/run-evgraph.sh
 
   action:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Start mock Assurance OS
         run: |
           python3 test/mock-server.py 8787 &

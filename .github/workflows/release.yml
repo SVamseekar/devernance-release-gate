@@ -1,0 +1,28 @@
+# Releases are immutable: v1.2.3 never moves once published. The major tag (v1) is a plain
+# Git tag with no release, moved here to the newest v1.x.y so `@v1` users get fixes.
+name: release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  major-tag:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Move the major tag to this release
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          [[ "$TAG" =~ ^v([0-9]+)\.[0-9]+\.[0-9]+$ ]] || { echo "::error::release tag '$TAG' is not vX.Y.Z"; exit 1; }
+          major="v${BASH_REMATCH[1]}"
+          git tag -f "$major" "$TAG"
+          git push -f origin "refs/tags/$major"
+          echo "$major now points at $TAG ($(git rev-parse "$TAG^{commit}"))"
