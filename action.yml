@@ -1,18 +1,18 @@
-name: Assurance OS release gate
-description: Fail the job when an AI system's release gate is BLOCKED (or REVIEW), using evidence tracked in Assurance OS.
-author: Assurance OS
+name: Devernance release gate
+description: Fail the job when an AI system's release gate is BLOCKED (or REVIEW), using evidence tracked in Devernance.
+author: Devernance
 branding:
   icon: shield
   color: blue
 inputs:
   api-key:
-    description: Assurance OS API key (store it as a secret)
+    description: Devernance API key (store it as a secret)
     required: true
   system-id:
-    description: The AI system id from Assurance OS
+    description: The AI system id from Devernance
     required: true
   api-url:
-    description: Base URL of your Assurance OS workspace, for example https://app.example.com
+    description: Base URL of your Devernance workspace, for example https://app.example.com
     required: true
   fail-on:
     description: "blocked (default) or review"
@@ -41,10 +41,10 @@ runs:
     - id: gate
       shell: bash
       env:
-        AOS_KEY: ${{ inputs.api-key }}
-        AOS_SYSTEM: ${{ inputs.system-id }}
-        AOS_URL: ${{ inputs.api-url }}
-        AOS_FAIL_ON: ${{ inputs.fail-on }}
+        GATE_API_KEY: ${{ inputs.api-key }}
+        GATE_SYSTEM_ID: ${{ inputs.system-id }}
+        GATE_API_URL: ${{ inputs.api-url }}
+        GATE_FAIL_ON: ${{ inputs.fail-on }}
       run: bash "$GITHUB_ACTION_PATH/scripts/gate.sh"
     - id: evgraph
       if: ${{ always() && inputs.evgraph-scan != '' }}

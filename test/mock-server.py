@@ -1,4 +1,4 @@
-"""Stand-in for the Assurance OS CI release-gate endpoint, used by the self-test workflow and test/run.sh."""
+"""Stand-in for the Devernance CI release-gate endpoint, used by the self-test workflow and test/run.sh."""
 import json
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer

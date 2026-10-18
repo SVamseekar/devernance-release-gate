@@ -1,7 +1,7 @@
 # Security
 
 Report a vulnerability privately through
-[GitHub private vulnerability reporting](https://github.com/SVamseekar/assurance-os-release-gate/security/advisories/new).
+[GitHub private vulnerability reporting](https://github.com/SVamseekar/devernance-release-gate/security/advisories/new).
 Please do not open a public issue.
 
 ## Releases

@@ -1,6 +1,6 @@
-# Assurance OS release gate
+# Devernance release gate
 
-Fail a GitHub Actions job when an AI system's release gate in [Assurance OS](https://github.com/SVamseekar/eu-ai-assurance-os)
+Fail a GitHub Actions job when an AI system's release gate in [Devernance](https://github.com/SVamseekar/devernance)
 is `BLOCKED` — or `REVIEW`, if you choose. The gate is computed from the evidence, controls, evals, and approvals
 tracked for that system. Optionally, also check the model card, approval record, and deployment record in your
 repository with [`evgraph scan-promotion --gate`](https://pypi.org/project/evgraph-cli/).
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: SVamseekar/assurance-os-release-gate@v1
+      - uses: SVamseekar/devernance-release-gate@v1
         with:
           api-key: ${{ secrets.ASSURANCE_API_KEY }}
           system-id: ${{ vars.ASSURANCE_SYSTEM_ID }}
@@ -29,7 +29,7 @@ jobs:
 Fail on `REVIEW` as well, and run the evgraph promotion scan on files in your repository:
 
 ```yaml
-      - uses: SVamseekar/assurance-os-release-gate@v1
+      - uses: SVamseekar/devernance-release-gate@v1
         with:
           api-key: ${{ secrets.ASSURANCE_API_KEY }}
           system-id: ${{ vars.ASSURANCE_SYSTEM_ID }}
@@ -42,7 +42,7 @@ Use the decision in later steps:
 
 ```yaml
       - id: gate
-        uses: SVamseekar/assurance-os-release-gate@v1
+        uses: SVamseekar/devernance-release-gate@v1
         with: { api-key: "${{ secrets.ASSURANCE_API_KEY }}", system-id: "${{ vars.ASSURANCE_SYSTEM_ID }}", api-url: "${{ vars.ASSURANCE_URL }}" }
       - run: echo "Gate said ${{ steps.gate.outputs.decision }}"
 ```
@@ -51,9 +51,9 @@ Use the decision in later steps:
 
 | Input | Required | Default | Description |
 |---|---|---|---|
-| `api-key` | yes | | Assurance OS API key. Store it as a repository or organisation secret. |
-| `system-id` | yes | | The AI system id shown in Assurance OS. |
-| `api-url` | yes | | Base URL of your Assurance OS workspace, for example `https://app.example.com`. |
+| `api-key` | yes | | Devernance API key. Store it as a repository or organisation secret. |
+| `system-id` | yes | | The AI system id shown in Devernance. |
+| `api-url` | yes | | Base URL of your Devernance workspace, for example `https://app.example.com`. |
 | `fail-on` | no | `blocked` | `blocked` fails only on `BLOCKED`; `review` also fails on `REVIEW`. |
 | `evgraph-scan` | no | | Three space-separated paths: model card, approval record, deployment record. Runs `evgraph scan-promotion --gate`. |
 | `evgraph-version` | no | `0.1.3` | `evgraph-cli` version installed for `evgraph-scan`. |
@@ -72,7 +72,7 @@ Use the decision in later steps:
 | `PASS` | passes |
 | `REVIEW` | passes (fails with `fail-on: review`) |
 | `BLOCKED` | fails, blockers listed in the log and job summary |
-| Wrong API key, unknown system, plan limit, any non-200 answer | fails with `Assurance OS returned HTTP <status>: <message>` |
+| Wrong API key, unknown system, plan limit, any non-200 answer | fails with `Devernance returned HTTP <status>: <message>` |
 | API unreachable or timed out (30 s) | fails with `HTTP 000` |
 | Answer is not a release-gate response | fails |
 | `evgraph-scan` finds an inconsistency | fails, report in the job summary |
@@ -82,7 +82,7 @@ The action never passes when it cannot read a decision.
 The job summary looks like this:
 
 ```
-### Assurance OS release gate: BLOCKED
+### Devernance release gate: BLOCKED
 
 - CONTROL:HUMAN_OVERSIGHT
 - Missing evidence: DPIA
@@ -92,7 +92,7 @@ Evidence and readiness signal, not legal advice.
 
 ## How to get an API key
 
-1. Sign in to your Assurance OS workspace.
+1. Sign in to your Devernance workspace.
 2. Open **Settings → API keys** and create a key named after the repository (for example `ci-claims-triage`).
 3. Copy the key once; it is not shown again. Add it as the `ASSURANCE_API_KEY` secret in
    **GitHub → Settings → Secrets and variables → Actions**.
@@ -109,7 +109,7 @@ If your organisation requires actions pinned to a commit, pin the SHA of a relea
 comment. Dependabot then opens a pull request for each new release:
 
 ```yaml
-      - uses: SVamseekar/assurance-os-release-gate@<commit-sha> # v1.0.0
+      - uses: SVamseekar/devernance-release-gate@<commit-sha> # v1.0.0
 ```
 
 ```yaml

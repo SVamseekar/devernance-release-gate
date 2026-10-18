@@ -16,7 +16,7 @@ run() {
   local name=$1 want=$2 text=$3
   export GITHUB_OUTPUT="$work/$name.out" GITHUB_STEP_SUMMARY="$work/$name.md"
   : > "$GITHUB_OUTPUT"; : > "$GITHUB_STEP_SUMMARY"
-  AOS_KEY=$4 AOS_SYSTEM=$5 AOS_URL=$6 AOS_FAIL_ON=$7 bash "$gate" > "$work/$name.log" 2>&1
+  GATE_API_KEY=$4 GATE_SYSTEM_ID=$5 GATE_API_URL=$6 GATE_FAIL_ON=$7 bash "$gate" > "$work/$name.log" 2>&1
   local got=$?
   if [[ "$got" != "$want" ]]; then
     echo "FAIL $name: exit $got, want $want"; cat "$work/$name.log"; failures=$((failures + 1)); return
@@ -29,7 +29,7 @@ run() {
 
 url="http://127.0.0.1:$port"
 run pass             0 "decision=PASS"                       test-key pass    "$url" blocked
-run pass-summary     0 "Assurance OS release gate: PASS"     test-key pass    "$url" blocked
+run pass-summary     0 "Devernance release gate: PASS"     test-key pass    "$url" blocked
 run blocked          1 "CONTROL:HUMAN_OVERSIGHT"             test-key blocked "$url" blocked
 run blocked-output   1 'blockers=["CONTROL:HUMAN_OVERSIGHT"' test-key blocked "$url" blocked
 run review-default   0 "decision=REVIEW"                     test-key review  "$url" blocked

@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - name: Start mock Assurance OS
+      - name: Start mock Devernance API
         run: |
           python3 test/mock-server.py 8787 &
           for _ in $(seq 1 50); do curl -s -o /dev/null http://127.0.0.1:8787/ && break; sleep 0.1; done
